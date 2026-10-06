@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel · Estúdio Go2</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='4' fill='%23ffffff' stroke='%23e4e4e7'/%3E%3Cpath d='M6 9h10l3-2M7 9v8M15 9v8' stroke='%23dc2626' stroke-width='2' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/app/estudio.css">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-painel" viewBox="0 0 24 24">
+    <rect x="3.5" y="3.5" width="7" height="7" rx="1"/><rect x="13.5" y="3.5" width="7" height="7" rx="1"/>
+    <rect x="3.5" y="13.5" width="7" height="7" rx="1"/><rect x="13.5" y="13.5" width="7" height="7" rx="1"/>
+  </symbol>
+  <symbol id="i-importar" viewBox="0 0 24 24">
+    <path d="M12 3.5v11"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M4 15.5v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+  </symbol>
+  <symbol id="i-cenario" viewBox="0 0 24 24">
+    <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5"/><path d="M12 12v9"/>
+  </symbol>
+  <symbol id="i-programacao" viewBox="0 0 24 24"><path d="M8.5 7L4 12l4.5 5"/><path d="M15.5 7l4.5 5-4.5 5"/><path d="M13.5 4.5l-3 15"/></symbol>
+  <symbol id="i-rodar" viewBox="0 0 24 24"><path d="M7 4.5l12 7.5-12 7.5z"/></symbol>
+  <symbol id="i-parar" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/></symbol>
+  <symbol id="i-treino" viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M6 19V11M10 19V7M14 19V13M18 19V5"/></symbol>
+  <symbol id="i-simulacoes" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M10 9l5 3-5 3z"/></symbol>
+  <symbol id="i-modelos" viewBox="0 0 24 24">
+    <rect x="3.5" y="8" width="13" height="5.5" rx="1"/><path d="M16.5 9.5l3.5-2.5"/><path d="M6 13.5l-1 6M9 13.5l1 6M12.5 13.5l-1 6M15 13.5l1 6"/>
+  </symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-centro" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.4"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24">
+    <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.5-2h4.4l1.5 2h1.8A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.5" r="3.2"/>
+  </symbol>
+  <symbol id="i-reiniciar" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4v4h4"/></symbol>
+  <symbol id="i-lixo" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-copiar" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="1.5"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/></symbol>
+  <symbol id="i-desfazer" viewBox="0 0 24 24"><path d="M8 7L4 11l4 4"/><path d="M4 11h10a5 5 0 0 1 0 10h-3"/></symbol>
+  <symbol id="i-refazer" viewBox="0 0 24 24"><path d="M16 7l4 4-4 4"/><path d="M20 11H10a5 5 0 0 0 0 10h3"/></symbol>
+
+  <!-- O Go2 de lado, cabeca a direita, joelhos para tras como no robo. -->
+  <symbol id="robo" viewBox="0 0 320 190">
+    <g class="r-longe"><path d="M232 92L216 124l16 32"/><path d="M126 92L110 124l16 32"/></g>
+    <rect class="r-corpo" x="92" y="72" width="150" height="30" rx="6"/>
+    <rect class="r-corpo" x="236" y="68" width="36" height="26" rx="5"/>
+    <path class="r-risca" d="M108 82h92"/>
+    <g class="r-perto"><path d="M222 96L206 128l16 32"/><path d="M116 96L100 128l16 32"/></g>
+    <g class="r-junta"><circle cx="222" cy="96" r="6"/><circle cx="206" cy="128" r="5"/><circle cx="116" cy="96" r="6"/><circle cx="100" cy="128" r="5"/></g>
+    <g class="r-pe"><circle cx="222" cy="160" r="4.5"/><circle cx="116" cy="160" r="4.5"/></g>
+  </symbol>
+</svg>
+
+<div class="casca">
+
+  <aside class="lateral">
+    <div class="lateral-topo">
+      <a class="marca" href="#/painel"><span class="marca-nome">Estúdio Go2</span><span class="marca-sub">0.3</span></a>
+      <button class="alternar" id="alternar-lateral" type="button" aria-expanded="true" aria-controls="menu-lateral" aria-label="Recolher o menu">
+        <svg class="ic"><use href="#i-menu"/></svg>
+      </button>
+    </div>
+    <nav aria-label="Seções" id="menu-lateral">
+      <ul>
+        <li><a href="#/painel" data-ir="painel" title="Painel"><svg class="ic"><use href="#i-painel"/></svg><span class="rotulo">Painel</span></a></li>
+        <li><a href="#/importar" data-ir="importar" title="Importar"><svg class="ic"><use href="#i-importar"/></svg><span class="rotulo">Importar</span></a></li>
+        <li><a href="#/cenario" data-ir="cenario" title="Cenário"><svg class="ic"><use href="#i-cenario"/></svg><span class="rotulo">Cenário</span></a></li>
+        <li><a href="#/programacao" data-ir="programacao" title="Programação"><svg class="ic"><use href="#i-programacao"/></svg><span class="rotulo">Programação</span></a></li>
+        <li><a href="#/treino" data-ir="treino" title="Treino"><svg class="ic"><use href="#i-treino"/></svg><span class="rotulo">Treino</span></a></li>
+        <li><a href="#/simulacoes" data-ir="simulacoes" title="Simulações"><svg class="ic"><use href="#i-simulacoes"/></svg><span class="rotulo">Simulações</span></a></li>
+        <li><a href="#/modelos" data-ir="modelos" title="Modelos"><svg class="ic"><use href="#i-modelos"/></svg><span class="rotulo">Modelos</span></a></li>
+      </ul>
+    </nav>
+    <div class="lateral-pe">
+      <div class="linha-estado"><span class="ponto" id="ponto-servidor"></span><span id="txt-servidor">Servidor</span></div>
+      <div class="linha-estado"><span class="ponto" id="ponto-mujoco"></span><span id="txt-mujoco">MuJoCo</span></div>
+    </div>
+  </aside>
+
+  <main class="conteudo">
+
+    <!-- ============ PAINEL ============ -->
+    <section data-vista="painel" aria-labelledby="t-painel">
+      <h1 id="t-painel" tabindex="-1">Painel</h1>
+
+      <div class="quadros">
+        <section class="quadro q-criar" aria-labelledby="t-criar">
+          <h2 id="t-criar">Nova simulação</h2>
+          <form id="criar" novalidate>
+            <div class="criar-topo">
+              <figure class="previa" data-base="chao">
+                <svg viewBox="0 0 320 190" role="img" aria-label="Prévia da base escolhida">
+                  <g class="p-chao"><path d="M0 164H320M20 176H300M50 188H270"/><path d="M160 132L60 190M160 132L110 190M160 132L160 190M160 132L210 190M160 132L260 190"/></g>
+                  <g class="p-suporte"><rect x="152" y="80" width="24" height="84" rx="2"/><ellipse cx="164" cy="164" rx="30" ry="5"/></g>
+                  <g class="p-queda"><path d="M222 140V164M116 140V164"/><ellipse cx="222" cy="164" rx="6" ry="1.8"/><ellipse cx="116" cy="164" rx="6" ry="1.8"/></g>
+                  <g class="p-robo"><use href="#robo"/></g>
+                </svg>
+              </figure>
+              <div class="campos-coluna">
+                <label class="campo"><span class="campo-nome">Nome</span>
+                  <input id="nome" name="nome" type="text" maxlength="60" autocomplete="off" placeholder="Simulação"></label>
+                <label class="campo"><span class="campo-nome">Modelo</span><select name="modelo" id="modelo"></select></label>
+                <fieldset class="campo"><legend class="campo-nome">Base</legend>
+                  <div class="segmento">
+                    <label><input type="radio" name="base" value="chao" checked><span>Chão livre</span></label>
+                    <label><input type="radio" name="base" value="bancada"><span>Bancada</span></label>
+                  </div>
+                </fieldset>
+                <fieldset class="campo"><legend class="campo-nome">Começa</legend>
+                  <div class="segmento">
+                    <label><input type="radio" name="comeca" value="parado" checked><span>Parado</span></label>
+                    <label><input type="radio" name="comeca" value="frente"><span>Frente</span></label>
+                    <label><input type="radio" name="comeca" value="girando"><span>Girando</span></label>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+            <fieldset class="campo"><legend class="campo-nome">Ações liberadas</legend>
+              <div class="marcas">
+                <label><input type="checkbox" name="acoes" value="andar" checked> Andar</label>
+                <label><input type="checkbox" name="acoes" value="girar" checked> Girar</label>
+                <label><input type="checkbox" name="acoes" value="sentar" checked> Sentar</label>
+                <label><input type="checkbox" name="acoes" value="deitar"> Deitar</label>
+                <label><input type="checkbox" name="acoes" value="reconhecer"> Reconhecer</label>
+              </div>
+            </fieldset>
+            <div class="criar-pe">
+              <span class="nota">Grava em <code>EstudioGo2/simulacoes/</code> e abre no editor de cenário.</span>
+              <button class="cmd forte" type="submit">Criar</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="quadro q-mujoco" aria-labelledby="t-mujoco-p">
+          <h2 id="t-mujoco-p">MuJoCo <span class="cab-extra" id="painel-cenario-nome"></span><a class="cab-link" href="#/cenario">Editor →</a></h2>
+          <div class="tela-mujoco" data-tela></div>
+        </section>
+
+        <section class="quadro q-galerias" aria-labelledby="t-sims-p">
+          <h2 id="t-sims-p">Simulações <a class="cab-link" href="#/simulacoes">Todas →</a></h2>
+          <div class="cartoes compacto" id="sims-painel"></div>
+          <h2 class="espaco-cima">Modelos <a class="cab-link" href="#/modelos">Todos →</a></h2>
+          <div class="cartoes compacto" id="modelos-painel"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- ============ CENARIO (editor) ============ -->
+    <section data-vista="cenario" aria-labelledby="t-cenario" hidden>
+      <div class="editor">
+        <div class="editor-topo">
+          <h1 id="t-cenario" tabindex="-1" class="so-leitor">Cenário</h1>
+          <input id="ed-nome" class="ed-nome" type="text" maxlength="60" aria-label="Nome da simulação" placeholder="Sem nome">
+          <span class="ed-base" id="ed-base"></span>
+          <span class="ed-sujo" id="ed-sujo" hidden>não salvo</span>
+          <span class="espaco"></span>
+          <button class="cmd icone" id="ed-desfazer" type="button" title="Desfazer (Ctrl+Z)" disabled><svg class="ic"><use href="#i-desfazer"/></svg></button>
+          <button class="cmd icone" id="ed-refazer" type="button" title="Refazer (Ctrl+Y)" disabled><svg class="ic"><use href="#i-refazer"/></svg></button>
+          <button class="cmd" id="ed-novo" type="button">Novo</button>
+          <button class="cmd forte" id="ed-salvar" type="button" title="Ctrl+S">Salvar</button>
+        </div>
+
+        <div class="editor-corpo">
+          <aside class="paleta" aria-label="Paleta">
+            <h3>Objetos</h3>
+            <div class="paleta-lista" id="paleta-objetos"></div>
+            <h3>Zonas</h3>
+            <div class="paleta-lista" id="paleta-zonas"></div>
+            <p class="paleta-dica" id="paleta-dica">Escolha um item e clique no chão para colocar.</p>
+          </aside>
+
+          <div class="tela-mujoco editor-tela" data-tela data-editor></div>
+
+          <aside class="inspetor" aria-label="Propriedades">
+            <div class="abas" role="tablist">
+              <button role="tab" type="button" aria-selected="true" data-aba="item">Item</button>
+              <button role="tab" type="button" aria-selected="false" data-aba="regras">Regras</button>
+              <button role="tab" type="button" aria-selected="false" data-aba="geral">Cenário</button>
+            </div>
+            <div class="aba-corpo" data-aba-corpo="item" id="insp-item"></div>
+            <div class="aba-corpo" data-aba-corpo="regras" id="insp-regras" hidden></div>
+            <div class="aba-corpo" data-aba-corpo="geral" id="insp-geral" hidden></div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ IMPORTAR ============ -->
+    <section data-vista="importar" aria-labelledby="t-importar" hidden>
+      <h1 id="t-importar" tabindex="-1">Importar</h1>
+      <div class="tres">
+        <section class="quadro">
+          <h2>Simulação</h2>
+          <label class="soltar" data-soltar="simulacao">
+            <input type="file" accept=".json" class="so-leitor">
+            <span class="soltar-tit">Arquivo .json</span>
+            <span class="soltar-sub">exportado de outro estúdio</span>
+          </label>
+          <p class="nota" data-info>Entra na lista de Simulações.</p>
+        </section>
+        <section class="quadro">
+          <h2>Textura</h2>
+          <form class="busca" id="busca-textura">
+            <input type="text" id="busca-termo" placeholder="Buscar no ambientCG: wood, bricks, grass…" maxlength="60" aria-label="Buscar textura">
+            <button class="cmd" type="submit">Buscar</button>
+          </form>
+          <div class="achados" id="busca-achados"></div>
+          <label class="soltar" data-soltar="textura">
+            <input type="file" accept=".png,.jpg,.jpeg,.zip" class="so-leitor" multiple>
+            <span class="soltar-tit">Pacote .zip ou imagem .png/.jpg</span>
+            <span class="soltar-sub">ambientCG, Poly Haven ou foto sua</span>
+          </label>
+          <p class="nota" data-info>Do pacote entram o mapa de cor e o brilho (rugosidade). Texturas do ambientCG são CC0.</p>
+        </section>
+        <section class="quadro">
+          <h2>Modelo de robô</h2>
+          <label class="soltar desligado" data-soltar="modelo">
+            <input type="file" accept=".xml,.zip" class="so-leitor" disabled>
+            <span class="soltar-tit">Arquivo .xml (MJCF)</span>
+            <span class="soltar-sub">ainda não</span>
+          </label>
+          <p class="nota" data-info>Só o Go2 por enquanto.</p>
+        </section>
+      </div>
+    </section>
+
+    <!-- ============ PROGRAMACAO ============ -->
+    <section data-vista="programacao" aria-labelledby="t-programacao" hidden>
+      <div class="prog">
+        <div class="editor-topo">
+          <h1 id="t-programacao" tabindex="-1" class="so-leitor">Programação</h1>
+          <input id="pr-nome" class="ed-nome" type="text" maxlength="60" aria-label="Nome do programa" placeholder="Nome do programa" autocomplete="off" spellcheck="false">
+          <span class="ed-sujo" id="pr-sujo" hidden>não salvo</span>
+          <span class="espaco"></span>
+          <button class="cmd" id="pr-novo" type="button">Novo</button>
+          <button class="cmd" id="pr-salvar" type="button" title="Ctrl+S">Salvar</button>
+          <button class="cmd icone perigo" id="pr-apagar" type="button" title="Apagar o programa gravado" aria-label="Apagar o programa gravado" disabled><svg class="ic"><use href="#i-lixo"/></svg></button>
+          <button class="cmd forte" id="pr-executar" type="button" title="Ctrl+Enter"><svg class="ic"><use href="#i-rodar"/></svg>Executar</button>
+          <button class="cmd" id="pr-parar" type="button" disabled><svg class="ic"><use href="#i-parar"/></svg>Parar</button>
+        </div>
+
+        <div class="prog-corpo">
+          <aside class="paleta" aria-label="Programas gravados">
+            <h3>Programas</h3>
+            <div class="paleta-lista" id="pr-lista"></div>
+            <p class="paleta-dica">Arquivos .py em <code>EstudioGo2/programas/</code>.</p>
+          </aside>
+
+          <div class="prog-meio">
+            <div class="codigo">
+              <pre class="codigo-numeros" id="pr-numeros" aria-hidden="true"></pre>
+              <textarea id="pr-codigo" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="Código do programa"></textarea>
+            </div>
+            <div class="saida">
+              <div class="saida-topo">
+                <span>Saída</span>
+                <span class="saida-estado" id="pr-estado"></span>
+                <span class="espaco"></span>
+                <button class="cmd pequeno" id="pr-limpar" type="button">Limpar</button>
+              </div>
+              <div class="saida-linhas" id="pr-saida"></div>
+            </div>
+          </div>
+
+          <div class="prog-lado">
+            <div class="tela-mujoco prog-tela" data-tela></div>
+            <div class="referencia">
+              <h3>O módulo <code>robo</code></h3>
+              <div class="referencia-lista" id="pr-referencia"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TREINO ============ -->
+    <section data-vista="treino" aria-labelledby="t-treino" hidden>
+      <h1 id="t-treino" tabindex="-1">Treino</h1>
+      <div class="treino">
+        <div class="treino-def">
+          <section class="quadro" aria-labelledby="t-tr-def">
+            <h2 id="t-tr-def">Definição</h2>
+            <div class="campos-coluna">
+              <label class="campo"><span class="campo-nome">Nome</span><input id="tr-nome" type="text" maxlength="60" autocomplete="off" placeholder="Treino"></label>
+              <div class="campo"><span class="campo-nome">Cenário</span><span class="tr-texto" id="tr-cenario">—</span><span class="nota">O que está aberto no editor, com as regras dele como pontuação.</span></div>
+              <label class="campo"><span class="campo-nome">Programa</span><select id="tr-programa"></select></label>
+              <div class="campo"><span class="campo-nome">Variáveis do programa</span><div id="tr-params-prog" class="tr-vars"></div></div>
+              <div class="campo"><span class="campo-nome">Ajustes do controlador</span><div id="tr-variaveis" class="tr-vars"></div></div>
+              <div class="tr-grade">
+                <label class="campo"><span class="campo-nome">Tentativas</span><input id="tr-tentativas" type="number" min="1" max="500" step="1" value="20"></label>
+                <label class="campo"><span class="campo-nome">Tempo máx. (s)</span><input id="tr-tempo" type="number" min="5" max="600" step="1" value="60"></label>
+                <label class="campo"><span class="campo-nome">Velocidade</span>
+                  <select id="tr-velocidade"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option><option value="10" selected>10×</option><option value="20">20×</option></select></label>
+                <label class="campo"><span class="campo-nome">Semente</span><input id="tr-semente" type="number" min="1" max="99999" step="1" value="1"></label>
+              </div>
+              <div class="criar-pe">
+                <span class="nota">A 1.ª tentativa usa os padrões; um terço explora ao acaso; o resto refina o melhor. Grava em <code>EstudioGo2/treinos/</code>.</span>
+                <span class="tr-botoes"><button class="cmd" id="tr-parar" type="button" disabled>Parar</button><button class="cmd forte" id="tr-iniciar" type="button">Iniciar</button></span>
+              </div>
+            </div>
+          </section>
+          <section class="quadro" aria-labelledby="t-tr-lista">
+            <h2 id="t-tr-lista">Gravados <span class="espaco"></span><button class="cmd pequeno icone perigo" id="tr-apagar" type="button" title="Apagar o treino aberto" aria-label="Apagar o treino aberto" disabled><svg class="ic"><use href="#i-lixo"/></svg></button></h2>
+            <div class="paleta-lista" id="tr-lista"></div>
+          </section>
+        </div>
+
+        <div class="treino-ver">
+          <div class="tela-mujoco" data-tela></div>
+          <section class="quadro" id="tr-andamento" hidden>
+            <h2><span id="tr-tit"></span><span class="cab-extra" id="tr-meta"></span></h2>
+            <p class="tr-linha" id="tr-linha"></p>
+            <div class="tr-campeao">
+              <div><span class="campo-nome">Campeão</span><div id="tr-melhor"></div><div class="tr-vals" id="tr-melhor-vals"></div></div>
+              <div class="tr-botoes">
+                <button class="cmd" id="tr-campeao" type="button" disabled>Ver o campeão</button>
+                <button class="cmd" id="tr-campeao-prog" type="button" disabled title="Grava um programa com os valores do campeão">Gravar programa campeão</button>
+                <button class="cmd" id="tr-campeao-usar" type="button" disabled title="Aplica os ajustes do controlador do campeão até reiniciar o estúdio">Usar ajustes</button>
+              </div>
+            </div>
+            <table class="tr-tabela" id="tr-tabela">
+              <thead><tr><th>#</th><th class="n">pts</th><th></th><th>fim</th><th class="n">s</th><th class="n">quedas</th><th>valores</th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <p class="insp-vazio" id="tr-vazio" hidden>Nenhuma tentativa ainda.</p>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SIMULACOES ============ -->
+    <section data-vista="simulacoes" aria-labelledby="t-simulacoes" hidden>
+      <h1 id="t-simulacoes" tabindex="-1">Simulações</h1>
+      <div class="cartoes" id="sims-todas"></div>
+    </section>
+
+    <!-- ============ MODELOS ============ -->
+    <section data-vista="modelos" aria-labelledby="t-modelos" hidden>
+      <h1 id="t-modelos" tabindex="-1">Modelos</h1>
+      <div class="cartoes" id="modelos-todos"></div>
+    </section>
+
+  </main>
+
+  <footer class="barra-estado" id="barra-estado">
+    <span class="barra-msg" id="barra-msg">Pronto.</span>
+    <button class="barra-log-btn" id="barra-log-btn" type="button" aria-expanded="false" aria-controls="barra-log">registro</button>
+    <div class="barra-log" id="barra-log" hidden></div>
+  </footer>
+</div>
+
+<template id="tpl-tela">
+  <img class="tela-video" alt="O Go2 no MuJoCo, ao vivo" draggable="false">
+  <div class="tela-aviso">
+    <strong data-aviso-tit>Ligando o MuJoCo</strong>
+    <span data-aviso-txt></span>
+  </div>
+  <span class="etiqueta tela-estado"><span class="ponto"></span><span data-txt>MuJoCo</span></span>
+  <div class="placar" data-placar hidden>
+    <span class="placar-pontos" data-placar-pontos>0</span>
+    <span class="placar-tempo" data-placar-tempo>0,0 s</span>
+    <span class="placar-fim" data-placar-fim hidden></span>
+    <ul class="placar-eventos" data-placar-eventos></ul>
+  </div>
+  <div class="ferramentas-tela">
+    <button class="ferr" type="button" data-cmd="recentrar" disabled title="Recentrar a câmera"><svg class="ic"><use href="#i-centro"/></svg></button>
+    <button class="ferr" type="button" data-cmd="camera" disabled title="Trocar de câmera"><svg class="ic"><use href="#i-camera"/></svg></button>
+    <button class="ferr" type="button" data-cmd="reiniciar" disabled title="Reiniciar"><svg class="ic"><use href="#i-reiniciar"/></svg></button>
+  </div>
+  <div class="tela-base">
+    <div class="troca" role="group" aria-label="Modo">
+      <button type="button" data-modo="editar" aria-pressed="false" disabled>Editar</button>
+      <button type="button" data-modo="testar" aria-pressed="false" disabled>Testar</button>
+    </div>
+    <span class="etiqueta" data-legenda hidden></span>
+  </div>
+</template>
+
+<script src="/app/mujoco.js"></script>
+<script src="/app/editor.js"></script>
+<script src="/app/programa.js"></script>
+<script src="/app/treino.js"></script>
+<script src="/app/app.js"></script>
+</body>
+</html>

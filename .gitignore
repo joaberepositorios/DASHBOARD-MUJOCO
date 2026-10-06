@@ -2,3 +2,10 @@ __pycache__/
 *.py[cod]
 .DS_Store
 Thumbs.db
+
+# Estudio Go2: dados do usuario (ficam em ~/EstudioGo2; estas sao as pastas antigas)
+sistema/estudio/simulacoes/
+sistema/estudio/programas/
+sistema/estudio/treinos/
+sistema/estudio/materiais/
+*.tmp
