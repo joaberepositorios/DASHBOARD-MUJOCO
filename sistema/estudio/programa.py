@@ -159,12 +159,13 @@ class Robo:
         self._mundo.comandar({"reiniciar": True})
 
     def ajustar(self, padrao=False, **valores):
-        """Muda ajustes do controlador até reiniciar o estúdio, ex.: robo.ajustar(marcha_T=0.5, ctrl_kp=110); padrao=True volta ao original."""
+        """Muda ajustes do controlador e grava (valem até mudar de novo), ex.: robo.ajustar(marcha_T=0.5, ctrl_kp=110); padrao=True volta aos de fábrica."""
         import treino as T
         if padrao:
-            T.aplicar_ajustes(self._mundo, T.padroes())
+            T.definir_ajustes(self._mundo, {}, gravar=not self._prog.valores)
         if valores:
-            T.aplicar_ajustes(self._mundo, {k.replace("_", ".", 1): v for k, v in valores.items()})
+            T.aplicar_ajustes(self._mundo, {k.replace("_", ".", 1): v for k, v in valores.items()},
+                              gravar=not self._prog.valores)     # dentro de um treino, nao grava
         return self.ajustes()
 
     def ajustes(self):

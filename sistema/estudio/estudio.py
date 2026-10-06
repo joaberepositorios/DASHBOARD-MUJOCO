@@ -193,6 +193,8 @@ class Manipulador(BaseHTTPRequestHandler):
             return self._json(self.server.treino.estado())
         if caminho == "/api/treino/variaveis":
             return self._json(T.variaveis_publicas(self.server.mundo))
+        if caminho == "/api/treino/ajustes":
+            return self._json(self.server.mundo.ajustes)
         if caminho == "/api/treinos":
             return self._json(T.listar())
         if len(partes) == 3 and partes[:2] == ["api", "treinos"]:
@@ -254,6 +256,11 @@ class Manipulador(BaseHTTPRequestHandler):
             return self._responder(lambda: self.server.treino.campeao(str(ler_json(self).get("id", ""))))
         if caminho == "/api/treino/campeao/programa":
             return self._responder(lambda: T.programa_campeao(str(ler_json(self).get("id", ""))))
+        if caminho == "/api/treino/ajustes":
+            def ajustar():
+                T.aplicar_ajustes(self.server.mundo, ler_json(self), gravar=True)
+                return self.server.mundo.ajustes
+            return self._responder(ajustar)
         if caminho == "/api/treino/campeao/usar":
             return self._responder(lambda: self.server.treino.usar_campeao(str(ler_json(self).get("id", ""))))
 
@@ -354,6 +361,8 @@ class Manipulador(BaseHTTPRequestHandler):
             return self._responder(self.server.programa.parar)
         if caminho == "/api/treino":
             return self._responder(self.server.treino.parar)
+        if caminho == "/api/treino/ajustes":
+            return self._responder(lambda: (T.definir_ajustes(self.server.mundo, {}, gravar=True), {})[1])
         if len(partes) == 3 and partes[:2] == ["api", "treinos"]:
             return self._responder(lambda: (T.apagar(partes[2]), self.server.treino.esquecer(partes[2]), {"ok": True})[2])
         if len(partes) == 3 and partes[:2] == ["api", "programas"]:
@@ -393,6 +402,7 @@ def principal():
     servidor.mundo = Mundo()
     servidor.programa = P.Programa(servidor.mundo)
     servidor.treino = T.Treino(servidor.mundo, servidor.programa)
+    servidor.mundo.ao_pronto = lambda: T.carregar_ajustes(servidor.mundo)
 
     url = "http://localhost:%d/" % args.porta
     print("")

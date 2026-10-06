@@ -26,6 +26,7 @@ POSE_DEITADO = np.array([0.0, 1.35, -2.65] * 4)
 VEL_MAX = 0.6          # m/s
 GIRO_MAX = 0.8         # rad/s
 RUMO_GANHO = 1.5       # rad/s por radiano fora do rumo; 2.0+ derruba o robo, 1.0 nao segura
+RUMO_GANHO_PADRAO = RUMO_GANHO   # os ajustes (treino.py) mudam RUMO_GANHO; este nao muda
 RUMO_GIRO_MAX = 0.5
 TOMBADO = 0.55         # cos do angulo com a vertical abaixo do qual tombou
 

@@ -74,20 +74,47 @@ def ajustes_atuais(mundo):
             saida[vid] = A.RUMO_GANHO
     return saida
 
-def aplicar_ajustes(mundo, valores):
+def _validar_ajustes(valores):
     for vid, v in valores.items():
         if vid not in POR_ID:
             raise ValueError("ajuste desconhecido: %r (os nomes: %s)" % (vid, ", ".join(POR_ID)))
         if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v):
             raise ValueError("%s precisa ser um numero" % vid)
-        grupo, chave = vid.split(".", 1)
-        with mundo.trava:
-            if grupo == "marcha":
-                mundo.motor.prm[chave] = float(v)
-            elif grupo == "ctrl":
-                mundo.motor.p[chave] = float(v)
-            elif chave == "rumo_ganho":
-                A.RUMO_GANHO = float(v)
+
+def aplicar_ajustes(mundo, valores, gravar=False):
+    """Muda os ajustes dados. Com gravar=True eles passam a valer sempre
+    (ajustes.json, carregado ao abrir o estudio)."""
+    _validar_ajustes(valores)
+    mundo.aplicar_ajustes(valores)
+    if gravar:
+        gravar_ajustes(mundo.ajustes)
+
+def definir_ajustes(mundo, valores, gravar=False):
+    """Troca o conjunto inteiro; vazio = padroes de fabrica."""
+    _validar_ajustes(valores)
+    mundo.definir_ajustes(valores)
+    if gravar:
+        gravar_ajustes(mundo.ajustes)
+
+ARQUIVO_AJUSTES = os.path.join(dados.RAIZ, "ajustes.json")
+
+def gravar_ajustes(valores):
+    os.makedirs(dados.RAIZ, exist_ok=True)
+    with open(ARQUIVO_AJUSTES, "w", encoding="utf-8") as fp:
+        json.dump(valores, fp, ensure_ascii=False, indent=1)
+
+def carregar_ajustes(mundo):
+    """Na abertura: o que ficou gravado passa a valer."""
+    try:
+        with open(ARQUIVO_AJUSTES, encoding="utf-8") as fp:
+            valores = json.load(fp)
+    except (OSError, ValueError):
+        return {}
+    valores = {k: v for k, v in valores.items() if k in POR_ID and isinstance(v, (int, float)) and not isinstance(v, bool)}
+    mundo.definir_ajustes(valores)
+    if valores:
+        print("  ajustes .... %s" % ", ".join("%s=%s" % kv for kv in valores.items()))
+    return valores
 
 def variaveis_publicas(mundo=None):
     pad = ajustes_atuais(mundo) if mundo is not None and mundo.pronto else padroes()
@@ -182,7 +209,7 @@ class Treino:
                     mn, mx = (0.0, 1.0) if pp["padrao"] == 0 else sorted((pp["padrao"] * 0.5, pp["padrao"] * 1.5))
                 variaveis.append({"id": "prog." + pp["nome"], "nome": pp["nome"], "origem": "programa",
                                   "padrao": pp["padrao"], "min": float(mn), "max": float(mx), "unidade": ""})
-        pad = padroes()
+        pad = ajustes_atuais(mundo)       # parte do que esta em vigor, nao da fabrica
         for v in p.get("variaveis") or []:
             vid = str(v.get("id", ""))
             if vid not in POR_ID:
@@ -199,11 +226,27 @@ class Treino:
         if not variaveis:
             raise ValueError("escolha ao menos uma variavel (treino.parametro no programa ou um ajuste do controlador)")
 
+        # parte do campeao do ultimo treino deste cenario com este programa:
+        # cada treino comeca de onde o anterior parou
+        partiu_de = None
+        anterior = ultimo_campeao(mundo.cen["id"], programa)
+        if anterior:
+            doc_ant, res = anterior
+            usados = []
+            for v in variaveis:
+                if v["id"] in res["valores"]:
+                    v["padrao"] = min(v["max"], max(v["min"], res["valores"][v["id"]]))
+                    usados.append(v["id"])
+            if usados:
+                partiu_de = {"treino": doc_ant["id"], "nome": doc_ant["nome"], "tentativa": res["n"],
+                             "pontos": res["pontos"], "variaveis": usados}
+
         cen = json.loads(json.dumps(mundo.cen))
         doc = {"id": id_livre(nome), "nome": nome, "criado": time.time(),
                "cenario": cen, "programa": programa, "codigo": codigo,
                "tentativas": total, "tempo_max": tempo_max, "velocidade": velocidade, "semente": semente,
-               "variaveis": variaveis, "resultados": [], "melhor": None, "estado": "rodando"}
+               "variaveis": variaveis, "resultados": [], "melhor": None, "estado": "rodando",
+               "partiu_de": partiu_de}
         return doc
 
     # --- rodar ---
@@ -234,7 +277,7 @@ class Treino:
     def _rodar(self):
         doc = self.doc
         mundo = self.mundo
-        antes = ajustes_atuais(mundo)
+        antes = dict(mundo.ajustes)
         busca = Busca(doc["variaveis"], doc["tentativas"], doc["semente"])
         try:
             mundo.velocidade = doc["velocidade"]
@@ -264,7 +307,7 @@ class Treino:
             self.programa.reservado = None
             self.fase = None
             try:
-                aplicar_ajustes(mundo, antes)
+                mundo.definir_ajustes(antes)
                 gravar(doc)
             except Exception as e:
                 traceback.print_exc()
@@ -336,7 +379,7 @@ class Treino:
 
     def _rodar_campeao(self):
         doc = self.doc
-        antes = ajustes_atuais(self.mundo)
+        antes = dict(self.mundo.ajustes)
         try:
             self.tentativa = doc["melhor"] + 1
             valores = doc["resultados"][doc["melhor"]]["valores"]
@@ -349,7 +392,7 @@ class Treino:
         finally:
             self.programa.reservado = None
             self.fase = None
-            aplicar_ajustes(self.mundo, antes)
+            self.mundo.definir_ajustes(antes)
 
     def usar_campeao(self, tid):
         """Aplica ao controlador os ajustes da melhor tentativa."""
@@ -359,7 +402,7 @@ class Treino:
         vals = {k: v for k, v in doc["resultados"][doc["melhor"]]["valores"].items() if not k.startswith("prog.")}
         if not vals:
             raise ValueError("o campeao nao tem ajustes do controlador; so' valores do programa")
-        aplicar_ajustes(self.mundo, vals)
+        aplicar_ajustes(self.mundo, vals, gravar=True)
         return vals
 
     def esquecer(self, tid):
@@ -463,12 +506,28 @@ def listar():
             continue
         melhor = doc["resultados"][doc["melhor"]] if doc.get("melhor") is not None else None
         saida.append({"id": doc["id"], "nome": doc["nome"], "estado": doc.get("estado"),
+                      "cenario_id": doc["cenario"]["id"], "criado": doc.get("criado", 0),
+                      "partiu_de": (doc.get("partiu_de") or {}).get("treino"),
                       "cenario": doc["cenario"]["nome"], "programa": doc.get("programa"),
                       "feitas": len(doc["resultados"]), "tentativas": doc["tentativas"],
                       "melhor_pontos": melhor["pontos"] if melhor else None,
                       "modificado": os.path.getmtime(os.path.join(PASTA, arq))})
     saida.sort(key=lambda t: -t["modificado"])
     return saida
+
+def ultimo_campeao(cenario_id, programa):
+    """O campeao do treino mais recente deste cenario com este programa
+    (ou sem programa), ou None."""
+    melhor = None
+    for t in listar():
+        if t["cenario_id"] != cenario_id or t["programa"] != programa or t["melhor_pontos"] is None:
+            continue
+        doc = carregar(t["id"])
+        if doc.get("melhor") is None:
+            continue
+        melhor = (doc, doc["resultados"][doc["melhor"]])
+        break                     # listar() vem do mais recente para o mais antigo
+    return melhor
 
 def apagar(tid):
     if not re.fullmatch(r"[a-z0-9-]{1,48}", tid or ""):

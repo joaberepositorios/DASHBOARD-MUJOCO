@@ -285,7 +285,9 @@
               <div class="campo"><span class="campo-nome">Cenário</span><span class="tr-texto" id="tr-cenario">—</span><span class="nota">O que está aberto no editor, com as regras dele como pontuação.</span></div>
               <label class="campo"><span class="campo-nome">Programa</span><select id="tr-programa"></select></label>
               <div class="campo"><span class="campo-nome">Variáveis do programa</span><div id="tr-params-prog" class="tr-vars"></div></div>
-              <div class="campo"><span class="campo-nome">Ajustes do controlador</span><div id="tr-variaveis" class="tr-vars"></div></div>
+              <div class="campo"><span class="campo-nome">Ajustes do controlador</span>
+                <div class="tr-vigor" id="tr-vigor" hidden><span id="tr-vigor-txt"></span><button class="cmd pequeno" id="tr-vigor-limpar" type="button" title="Volta os ajustes de fábrica e apaga o gravado">Voltar ao padrão</button></div>
+                <div id="tr-variaveis" class="tr-vars"></div></div>
               <div class="tr-grade">
                 <label class="campo"><span class="campo-nome">Tentativas</span><input id="tr-tentativas" type="number" min="1" max="500" step="1" value="20"></label>
                 <label class="campo"><span class="campo-nome">Tempo máx. (s)</span><input id="tr-tempo" type="number" min="5" max="600" step="1" value="60"></label>
@@ -303,6 +305,11 @@
             <h2 id="t-tr-lista">Gravados <span class="espaco"></span><button class="cmd pequeno icone perigo" id="tr-apagar" type="button" title="Apagar o treino aberto" aria-label="Apagar o treino aberto" disabled><svg class="ic"><use href="#i-lixo"/></svg></button></h2>
             <div class="paleta-lista" id="tr-lista"></div>
           </section>
+          <section class="quadro" aria-labelledby="t-tr-curva">
+            <h2 id="t-tr-curva">Evolução neste cenário <span class="cab-extra" id="tr-curva-meta"></span></h2>
+            <svg class="tr-curva" id="tr-curva" viewBox="0 0 360 120" role="img" aria-label="Melhor pontuação por treino"></svg>
+            <p class="insp-vazio" id="tr-curva-vazio">Nenhum treino gravado para o cenário aberto.</p>
+          </section>
         </div>
 
         <div class="treino-ver">
@@ -310,6 +317,7 @@
           <section class="quadro" id="tr-andamento" hidden>
             <h2><span id="tr-tit"></span><span class="cab-extra" id="tr-meta"></span></h2>
             <p class="tr-linha" id="tr-linha"></p>
+            <p class="nota tr-partiu" id="tr-partiu" hidden></p>
             <div class="tr-campeao">
               <div><span class="campo-nome">Campeão</span><div id="tr-melhor"></div><div class="tr-vals" id="tr-melhor-vals"></div></div>
               <div class="tr-botoes">

@@ -223,6 +223,8 @@ class Mundo:
         self.pronto = False
 
         self.m = self.d = self.motor = None
+        self.ajustes = {}        # ajustes do controlador em vigor: "marcha.T" -> valor
+        self.ao_pronto = None    # chamado uma vez quando a cena fica pronta
         self.cen = None
         self.materiais = {}
         self.mat_ids = {}
@@ -280,6 +282,11 @@ class Mundo:
             traceback.print_exc()
             return self._falhar("nao consegui montar a cena: %s" % e)
         print("  MuJoCo ..... cena pronta (%s)" % self.pasta)
+        if self.ao_pronto:
+            try:
+                self.ao_pronto()
+            except Exception:
+                traceback.print_exc()
         threading.Thread(target=self._laco_fisica, name="fisica", daemon=True).start()
         threading.Thread(target=self._laco_imagem, name="imagem", daemon=True).start()
 
@@ -311,9 +318,41 @@ class Mundo:
             self.materiais = materiais
             self.assinatura = C.assinatura(cen)
             self.motor = controle.MotorDinamico(m, d)
+            self._reaplicar_ajustes()      # o motor novo nasce com os padroes
             self._mapear()
             self.geracao += 1
             self._posicionar_robo()
+
+    # ---------- ajustes do controlador ----------
+
+    def _reaplicar_ajustes(self):
+        import controle
+        self.motor.prm = dict(controle.PARAM_MARCHA)
+        self.motor.p = dict(controle.PARAM_CTRL)
+        A.RUMO_GANHO = A.RUMO_GANHO_PADRAO
+        for vid, v in self.ajustes.items():
+            grupo, chave = vid.split(".", 1)
+            if grupo == "marcha":
+                self.motor.prm[chave] = float(v)
+            elif grupo == "ctrl":
+                self.motor.p[chave] = float(v)
+            elif chave == "rumo_ganho":
+                A.RUMO_GANHO = float(v)
+
+    def definir_ajustes(self, valores):
+        """Troca o conjunto inteiro (vazio = padroes de fabrica). Os valores
+        ja' vem validados por treino.py."""
+        with self.trava:
+            self.ajustes = {k: float(v) for k, v in valores.items()}
+            if self.motor is not None:
+                self._reaplicar_ajustes()
+
+    def aplicar_ajustes(self, valores):
+        """Muda so' os ajustes dados, mantendo os outros."""
+        with self.trava:
+            self.ajustes.update({k: float(v) for k, v in valores.items()})
+            if self.motor is not None:
+                self._reaplicar_ajustes()
 
     def _versao_cubo(self, mat):
         """A textura dos objetos em 512 px: um cubo guarda seis faces, e dez

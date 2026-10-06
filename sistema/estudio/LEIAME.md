@@ -206,15 +206,25 @@ tempo. A busca: a 1.ª tentativa usa os padrões, um terço explora ao acaso
 dentro dos limites, o resto perturba o melhor com passos cada vez menores
 (semente fixa: o mesmo treino repete igual).
 
+**O treino acumula.** Um treino novo no mesmo cenário com o mesmo programa
+parte do campeão do treino anterior: a 1.ª tentativa usa os valores dele
+(dentro dos limites), e a página diz de quem partiu. Os ajustes do
+controlador marcados partem do que está em vigor, não dos padrões de
+fábrica. A caixa "Evolução neste cenário" desenha a melhor pontuação de
+cada treino gravado para o cenário aberto, do mais antigo ao mais novo.
+
 Tudo vai para `treinos/<id>.json` **conforme acontece** (definição, cópia
 do cenário e do código, cada tentativa, o melhor), então parar no meio não
 perde nada. O campeão tem três saídas: **Ver o campeão** (roda a melhor
 tentativa de novo, a 1×, no cenário gravado), **Gravar programa campeão**
 (escreve um `.py` com os valores do campeão no lugar dos padrões e, se
 houver, uma linha `robo.ajustar(...)` no início) e **Usar ajustes** (aplica
-os ajustes do controlador do campeão até reiniciar o estúdio). Em
-Programação, `robo.ajustar(marcha_T=0.5, ctrl_kp=110)` e `robo.ajustes()`
-fazem o mesmo à mão.
+os ajustes do controlador do campeão e **grava** em `ajustes.json` na pasta
+de dados: valem em toda abertura do estúdio, sobrevivem a recompilar a
+cena, e a seção Treino mostra "em vigor" com um botão para voltar aos de
+fábrica). Em Programação, `robo.ajustar(marcha_T=0.5, ctrl_kp=110)` faz o
+mesmo e também grava; `robo.ajustar(padrao=True)` limpa; `robo.ajustes()`
+mostra. Dentro de um treino, os valores experimentados nunca são gravados.
 
 Enquanto um treino roda, a seção Programação não executa (o programa é do
 treino). O OneDrive segura arquivos por instantes ao sincronizar; as
@@ -268,7 +278,8 @@ onde o raio cruza o chão, para colocar e arrastar.
 | GET | `/api/programas/<nome>/parametros` | as chamadas `treino.parametro` do programa |
 | GET / POST / DELETE | `/api/treino` | estado do treino em curso; iniciar `{nome, programa, variaveis, tentativas, tempo_max, velocidade, semente}`; parar |
 | GET | `/api/treino/variaveis` | ajustes do controlador que podem variar, com o valor em vigor |
-| POST | `/api/treino/campeao` · `/campeao/programa` · `/campeao/usar` | `{id}`: rodar a 1×; gravar o `.py`; aplicar os ajustes |
+| POST | `/api/treino/campeao` · `/campeao/programa` · `/campeao/usar` | `{id}`: rodar a 1×; gravar o `.py`; aplicar e gravar os ajustes |
+| GET / POST / DELETE | `/api/treino/ajustes` | os ajustes em vigor; mudar e gravar `{"marcha.T": 0.7}`; voltar aos de fábrica |
 | GET | `/api/treinos` | os gravados |
 | GET / DELETE | `/api/treinos/<id>` | ler (sem o cenário e o código inteiros); apagar |
 
@@ -281,6 +292,7 @@ onde o raio cruza o chão, para colocar e arrastar.
 5. **Programação**: editor de Python na página, módulo `robo`, executado
    pelo próprio servidor; saída, Parar, programas gravados — feito.
 6. **Treino por tentativa** no cenário montado, pontuando pelas regras; gravação em pasta — feito.
+   Complemento (05/10/2026): ajustes persistentes, treino partindo do campeão anterior, curva por cenário — feito.
 7. Conversa com IA: o modelo escreve programas (passo 5) ou chama as ações.
 8. Importar modelos de outros robôs.
 9. Reconhecer algo: câmera do robô e modelo com visão.

@@ -442,6 +442,16 @@ input[type="checkbox"] { accent-color: var(--acento); width: 14px; height: 14px;
 .tr-faixa input[type="number"] { width: 64px; height: 24px; font-size: 11.5px; padding: 0 4px; }
 .tr-grade { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .tr-botoes { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.tr-vigor { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 8px; margin-bottom: 4px; border: 1px solid var(--acento-meio); border-radius: var(--raio); background: var(--acento-leito); font-size: 11.5px; color: var(--ink2); }
+.tr-vigor span { font-family: Consolas, "Cascadia Mono", monospace; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tr-partiu { margin: -6px 0 10px; }
+.tr-curva { display: block; width: 100%; height: auto; }
+.tr-curva .eixo { stroke: var(--axis); stroke-width: 1; }
+.tr-curva .linha { fill: none; stroke: var(--acento); stroke-width: 1.5; }
+.tr-curva .ponto { fill: #fff; stroke: var(--acento); stroke-width: 1.5; }
+.tr-curva .ponto.aberto { fill: var(--acento); }
+.tr-curva text { font-size: 9px; fill: var(--muted); font-family: inherit; }
+.tr-curva .zero { stroke: var(--hair); stroke-dasharray: 2 3; }
 .tr-linha { margin: 0 0 10px; font-variant-numeric: tabular-nums; color: var(--ink2); }
 .tr-linha.erro { color: var(--acento); font-weight: 600; }
 .tr-campeao { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; padding: 8px 10px; margin-bottom: 10px; border: 1px solid var(--hair); border-radius: var(--raio); background: var(--palco); }

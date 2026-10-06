@@ -25,6 +25,25 @@ async function trCarregarBases() {
   if (TR.programas.some(p => p.nome === atual)) sel.value = atual;
   trRenderVariaveis();
   trCarregarParamsProg();
+  trCarregarVigor();
+}
+
+async function trCarregarVigor() {
+  let v = {};
+  try { v = await pedirJson("/api/treino/ajustes", "GET"); } catch { return; }
+  const ids = Object.keys(v);
+  $("#tr-vigor").hidden = !ids.length;
+  $("#tr-vigor-txt").textContent = ids.length ? "em vigor: " + trValores(v) : "";
+  $("#tr-vigor-txt").title = $("#tr-vigor-txt").textContent;
+}
+
+async function trLimparVigor() {
+  if (!confirm("Voltar os ajustes do controlador aos de fábrica? O gravado é apagado.")) return;
+  try {
+    await pedirJson("/api/treino/ajustes", "DELETE");
+    avisar("Ajustes de fábrica de volta.");
+    await trCarregarBases();
+  } catch (err) { avisar("Ajustes: " + err.message, true); }
 }
 
 function trRenderVariaveis() {
@@ -108,6 +127,9 @@ function trRenderTreino(t, est) {
   else linha = `parado em ${t.resultados.length} de ${t.tentativas}`;
   $("#tr-linha").textContent = linha;
   $("#tr-linha").classList.toggle("erro", t.estado === "erro");
+  const pd = t.partiu_de;
+  $("#tr-partiu").hidden = !pd;
+  if (pd) $("#tr-partiu").textContent = `A 1.ª tentativa partiu do campeão de "${pd.nome}" (tentativa ${pd.tentativa}, ${pd.pontos} pts): ${pd.variaveis.map(v => v.replace(/^prog\./, "")).join(", ")}.`;
 
   const m = t.melhor != null ? t.resultados[t.melhor] : null;
   $("#tr-melhor").textContent = m ? `tentativa ${m.n} · ${m.pontos} pts · ${m.fim || "sem fim"} · ${trNum(m.tempo, 1)} s · ${m.quedas} quedas` : "ainda sem tentativa concluída";
@@ -170,6 +192,37 @@ async function trCarregarLista() {
     return b;
   }));
   if (!TR.lista.length) caixa.append(el("p", { class: "insp-vazio", text: "Nenhum gravado." }));
+  trRenderCurva();
+}
+
+function trRenderCurva() {
+  const svg = $("#tr-curva"), ns = "http://www.w3.org/2000/svg";
+  const cid = mjEstado?.cenario?.id;
+  const pts = TR.lista.filter(t => t.cenario_id === cid && t.melhor_pontos != null)
+    .sort((a, b) => a.criado - b.criado);
+  svg.replaceChildren();
+  $("#tr-curva-vazio").hidden = pts.length > 0;
+  $("#tr-curva-meta").textContent = pts.length ? `${pts.length} treino${pts.length > 1 ? "s" : ""} · melhor ${Math.max(...pts.map(p => p.melhor_pontos))} pts` : "";
+  svg.hidden = !pts.length;
+  if (!pts.length) return;
+  const W = 360, H = 120, l = 34, r = 10, t = 10, b = 22;
+  const ys = pts.map(p => p.melhor_pontos);
+  let lo = Math.min(0, ...ys), hi = Math.max(0, ...ys);
+  if (hi === lo) hi = lo + 1;
+  const x = i => pts.length === 1 ? (l + W - r) / 2 : l + (W - l - r) * i / (pts.length - 1);
+  const y = v => t + (H - t - b) * (1 - (v - lo) / (hi - lo));
+  const mk = (tag, attrs, texto) => { const n = document.createElementNS(ns, tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); if (texto != null) n.textContent = texto; return n; };
+  svg.append(mk("line", { class: "eixo", x1: l, y1: t, x2: l, y2: H - b }), mk("line", { class: "eixo", x1: l, y1: H - b, x2: W - r, y2: H - b }));
+  if (lo < 0) svg.append(mk("line", { class: "zero", x1: l, y1: y(0), x2: W - r, y2: y(0) }));
+  svg.append(mk("text", { x: l - 4, y: y(hi) + 3, "text-anchor": "end" }, String(hi)), mk("text", { x: l - 4, y: y(lo) + 3, "text-anchor": "end" }, String(lo)));
+  svg.append(mk("polyline", { class: "linha", points: pts.map((p, i) => `${x(i)},${y(p.melhor_pontos)}`).join(" ") }));
+  pts.forEach((p, i) => {
+    const c = mk("circle", { class: "ponto" + (p.id === TR.aberto ? " aberto" : ""), cx: x(i), cy: y(p.melhor_pontos), r: 3.5 });
+    c.append(mk("title", {}, `${p.nome}: ${p.melhor_pontos} pts`));
+    c.addEventListener("click", () => trAbrir(p.id));
+    svg.append(c);
+    if (pts.length <= 8 || i === 0 || i === pts.length - 1) svg.append(mk("text", { x: x(i), y: H - b + 12, "text-anchor": "middle" }, p.nome.length > 12 ? p.nome.slice(0, 11) + "…" : p.nome));
+  });
 }
 
 async function trAbrir(id) {
@@ -179,6 +232,7 @@ async function trAbrir(id) {
     const est = await pedirJson("/api/treino", "GET").catch(() => null);
     trRenderTreino(t, est?.treino?.id === id ? est : null);
     for (const b of $$("#tr-lista button")) b.setAttribute("aria-pressed", String(b.dataset.id === id));
+    trRenderCurva();
   } catch (err) { avisar("Treino: " + err.message, true); }
 }
 
@@ -197,7 +251,7 @@ async function trCampeao(acao) {
   try {
     if (acao === "ver") { trAplicarEstado(await pedirJson("/api/treino/campeao", "POST", { id: TR.aberto })); trAgendar(); avisar("Mostrando o campeão a 1×."); }
     else if (acao === "programa") { const r = await pedirJson("/api/treino/campeao/programa", "POST", { id: TR.aberto }); avisar(`Programa gravado: ${r.nome}.py (abra em Programação).`); if (typeof prCarregarLista === "function") prCarregarLista(); }
-    else if (acao === "usar") { const v = await pedirJson("/api/treino/campeao/usar", "POST", { id: TR.aberto }); avisar("Ajustes aplicados até reiniciar o estúdio: " + trValores(v)); }
+    else if (acao === "usar") { const v = await pedirJson("/api/treino/campeao/usar", "POST", { id: TR.aberto }); avisar("Ajustes gravados; valem a partir de agora: " + trValores(v)); trCarregarBases(); }
   } catch (err) { avisar("Campeão: " + err.message, true); }
 }
 
@@ -218,8 +272,12 @@ function treinoIniciar() {
   $("#tr-campeao").addEventListener("click", () => trCampeao("ver"));
   $("#tr-campeao-prog").addEventListener("click", () => trCampeao("programa"));
   $("#tr-campeao-usar").addEventListener("click", () => trCampeao("usar"));
+  $("#tr-vigor-limpar").addEventListener("click", trLimparVigor);
+  let cenarioVisto = null;
   mjOuvintes.push(estado => {
     if (trSecao().hidden) return;
     $("#tr-cenario").textContent = estado?.cenario?.nome || "—";
+    const cid = estado?.cenario?.id ?? null;
+    if (cid !== cenarioVisto) { cenarioVisto = cid; trRenderCurva(); }
   });
 }
